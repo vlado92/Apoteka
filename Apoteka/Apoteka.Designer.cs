@@ -190,6 +190,7 @@
             this.nazivCheck.TabIndex = 37;
             this.nazivCheck.Text = "Naziv lijeka";
             this.nazivCheck.UseVisualStyleBackColor = true;
+            this.nazivCheck.CheckedChanged += new System.EventHandler(this.nazivCheck_CheckedChanged);
             // 
             // latinskiCheck
             // 
@@ -200,6 +201,7 @@
             this.latinskiCheck.TabIndex = 38;
             this.latinskiCheck.Text = "Latinski naziv";
             this.latinskiCheck.UseVisualStyleBackColor = true;
+            this.latinskiCheck.CheckedChanged += new System.EventHandler(this.latinskiCheck_CheckedChanged);
             // 
             // izmjeniPodatkeButton
             // 

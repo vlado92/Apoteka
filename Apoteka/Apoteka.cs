@@ -11,7 +11,7 @@ namespace APOTEKA
         static public string filePath = @"c:\\Apoteka\\Apoteka.txt";
         static public System.IO.StreamWriter write = null;
         static public string[] text = null;
-
+        
         public Apoteka(string path)
         {
             InitializeComponent();
@@ -95,7 +95,7 @@ namespace APOTEKA
             }
             conn.Close();
         }
-
+        
         private void naziv_SelectedIndexChanged(object sender, EventArgs e)
         {
             bezPDV.SelectedIndex = saPDV.SelectedIndex = latinski_naziv.SelectedIndex = naziv.SelectedIndex;
@@ -136,6 +136,19 @@ namespace APOTEKA
                     conn.Open();
                     command.ExecuteNonQuery();
                     conn.Close();
+                    updateText();
+                    text[i] = "";
+
+                    using (System.IO.StreamWriter writer = new System.IO.StreamWriter(filePath))
+                    {
+                        for (int j = 0; j < Apoteka.text.Length - 1; j++)
+                        {
+                            if(text[j].Length > 0)
+                                writer.WriteLine(Apoteka.text[j]);
+                        }
+                        writer.Write(Apoteka.text[Apoteka.text.Length - 1]);
+
+                    }
                     Apoteka_Load(sender, e);
                 }
             }
@@ -158,75 +171,83 @@ namespace APOTEKA
         }
         private void searchBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (e.KeyChar == 13)
-                pretraga_Click(sender, e);
+                if (e.KeyChar == 13)
+                    pretraga_Click(sender, e);
         }
         private void searchBox_TextChanged(object sender, EventArgs e)
         {
-            pretraga_Click(sender, e);
+                pretraga_Click(sender, e);
         }
         private void pretraga_Click(object sender, EventArgs e)
         {
-            if (!(nazivCheck.Checked || latinskiCheck.Checked))
-                MessageBox.Show("Izaberite po čemu želite da pretražite");
+            if (searchBox.Text == " ")
+            {
+                searchBox.Text = "";
+            }
             else
             {
-                if (string.IsNullOrEmpty(searchBox.Text))
-                    Apoteka_Load(sender, e);
+                if (!(nazivCheck.Checked || latinskiCheck.Checked))
+                    MessageBox.Show("Izaberite po čemu želite da pretražite");
                 else
                 {
-                    Ocisti();
-                    conn.Close();
-                    conn.Open();
-                    SqlCeCommand command = new SqlCeCommand();
-                    SqlCeDataReader reader;
-
-                    command.Connection = conn;
-                    if (tacno.Checked)
-                    {
-                        if (nazivCheck.Checked)
-                        {
-                            command.CommandText = "SELECT * FROM Lijekovi WHERE naziv = '" + searchBox.Text + "';";
-                            reader = command.ExecuteReader();
-                            while (reader.Read())
-                            {
-                                Popuni(reader);
-                            }
-                        }
-                        if (latinskiCheck.Checked)
-                        {
-                            command.CommandText = "SELECT * FROM Lijekovi WHERE naziv = '" + searchBox.Text + "';";
-                            reader = command.ExecuteReader();
-                            while (reader.Read())
-                            {
-                                Popuni(reader);
-                            }
-                        }
-                    }
-                    else if (sadrzano.Checked)
-                    {
-                        if (nazivCheck.Checked)
-                        {
-                            command.CommandText = "SELECT * FROM Lijekovi WHERE latinski_naziv LIKE '%" + searchBox.Text + "%';";
-                            reader = command.ExecuteReader();
-                            while (reader.Read())
-                            {
-                                Popuni(reader);
-                            }
-                        }
-                        if (latinskiCheck.Checked)
-                        {
-                            command.CommandText = "SELECT * FROM Lijekovi WHERE latinski_naziv LIKE '%" + searchBox.Text + "%';";
-                            reader = command.ExecuteReader();
-                            while (reader.Read())
-                            {
-                                Popuni(reader);
-                            }
-                        }
-                    }
+                    if (string.IsNullOrEmpty(searchBox.Text))
+                        Apoteka_Load(sender, e);
                     else
-                        MessageBox.Show("Nisu ispunjeni uslovi za pretragu");
-                    conn.Close();
+                    {
+                        Ocisti();
+                        conn.Close();
+                        conn.Open();
+                        SqlCeCommand command = new SqlCeCommand();
+                        SqlCeDataReader reader;
+
+                        command.Connection = conn;
+                        if (tacno.Checked)
+                        {
+                            if (nazivCheck.Checked)
+                            {
+                                command.CommandText = "SELECT * FROM Lijekovi WHERE naziv = '" + searchBox.Text + "';";
+                                reader = command.ExecuteReader();
+                                while (reader.Read())
+                                {
+                                    Popuni(reader);
+                                }
+                            }
+                            if (latinskiCheck.Checked)
+                            {
+                                command.CommandText = "SELECT * FROM Lijekovi WHERE naziv = '" + searchBox.Text + "';";
+                                reader = command.ExecuteReader();
+                                while (reader.Read())
+                                {
+                                    Popuni(reader);
+                                }
+                            }
+                        }
+                        else if (sadrzano.Checked)
+                        {
+
+                            if (nazivCheck.Checked)
+                            {
+                                command.CommandText = "SELECT * FROM Lijekovi WHERE naziv LIKE '%" + searchBox.Text + "%';";
+                                reader = command.ExecuteReader();
+                                while (reader.Read())
+                                {
+                                    Popuni(reader);
+                                }
+                            }
+                            if (latinskiCheck.Checked)
+                            {
+                                command.CommandText = "SELECT * FROM Lijekovi WHERE latinski_naziv LIKE '%" + searchBox.Text + "%';";
+                                reader = command.ExecuteReader();
+                                while (reader.Read())
+                                {
+                                    Popuni(reader);
+                                }
+                            }
+                        }
+                        else
+                            MessageBox.Show("Nisu ispunjeni uslovi za pretragu");
+                        conn.Close();
+                    }
                 }
             }
         }
@@ -257,15 +278,40 @@ namespace APOTEKA
         }
 
         private void Apoteka_FormClosing(object sender, FormClosingEventArgs e)
+        {   /*
+            try
+            {
+                MailMessage mail = new MailMessage("vladimir.kunarac@gmail.com", "vladimir.kunarac@gmail.com");
+                SmtpClient client = new SmtpClient("smtp.gmail.com", 587);
+                client.EnableSsl = true;
+                client.DeliveryMethod = SmtpDeliveryMethod.Network;
+                client.UseDefaultCredentials = false;
+               
+                mail.Subject = "this is a test email.";
+                mail.Body = "this is my test email body";
+                client.Credentials = new System.Net.NetworkCredential("vladimir.kunarac@gmail.com", "230919922");
+                client.Send(mail);
+            }
+            catch(SmtpException ee)
+            {
+                Console.Out.WriteLine(ee.ToString());
+            }*/
+        }
+
+        private void nazivCheck_CheckedChanged(object sender, EventArgs e)
         {
-          //  MessageBox.Show("DOSLO");
-        //   System.Net.WebClient client = new System.Net.WebClient();
-          //  System.IO.Stream stream = client.OpenRead("https://drive.google.com/file/d/0B7HxUII5udHVMHVQbnBKaUNPLXM/view");
-         //   System.IO.StreamReader reader = new System.IO.StreamReader(stream);
-         //   String content = reader.ReadToEnd();
-           //     this.Dispose();
-                //client.UploadFile("https://drive.google.com/drive/folders/0B7HxUII5udHVcmxuOXVBbE9yeEk?usp=sharing", filePath);
+            if(nazivCheck.Checked)
+                if (latinskiCheck.Checked)
+                    latinskiCheck.Checked = false;
             
+        }
+
+        private void latinskiCheck_CheckedChanged(object sender, EventArgs e)
+        {
+            if(latinskiCheck.Checked)
+                if (nazivCheck.Checked)
+                    nazivCheck.Checked = false;
+        
         }
     }
 }

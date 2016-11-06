@@ -112,6 +112,7 @@ namespace APOTEKA
                         nazivText.Clear();
                         latinskiText.Clear();
                         conn.Close();
+                        nazivText.Focus();
                     }
                     catch (SqlCeException ee)
                     {
@@ -223,6 +224,29 @@ namespace APOTEKA
             }
             else
                 bezPDVText.Text += ",00";
+            
+            //uklanja sa pocetka niza razmake
+            while (nazivText.Text.StartsWith(" "))
+            {
+                nazivText.Text = nazivText.Text.Substring(1);
+            }
+            while (latinskiText.Text.StartsWith(" "))
+            {
+                latinskiText.Text = latinskiText.Text.Substring(1);
+            }
+
+            //uklanja sa kraja razmake
+            while (nazivText.Text.EndsWith(" "))
+            {
+                nazivText.Text = nazivText.Text.Substring(0, nazivText.Text.Length - 1);
+            }
+            while (latinskiText.Text.EndsWith(" "))
+            {
+                latinskiText.Text = latinskiText.Text.Substring(0, latinskiText.Text.Length - 1);
+            }
+
+
+
         }
 
         private void PodatciLijeka_Load(object sender, EventArgs e)
